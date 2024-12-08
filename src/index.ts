@@ -1,9 +1,38 @@
 import { Elysia, t } from "elysia";
 import { createDb } from "./db";
 import { faker } from "@faker-js/faker";
+import { z } from "zod";
 
+enum Hobbies {
+  Dance = "Dance", 
+  Karate =  "Karate", 
+  Swimming = "Swimming"
+}
 
+const seniority = ["Junior", "Mid", "Senior"] as const;
 
+const UserSchema = z.object({
+  userName: z.string(),
+  age: z.number().gt(0),
+  birthday: z.date().optional(),
+  isProgrammer: z.boolean().nullable(),
+  hobby: z.nativeEnum(Hobbies),
+  seniority: z.enum(seniority)
+});
+
+type User = z.infer<typeof UserSchema>;
+
+const user: User = { 
+  userName: "John Doe",
+  age: 10,
+  isProgrammer: null,
+  hobby: Hobbies.Dance,
+  seniority: "Mid"
+}
+
+console.log(UserSchema.parse(user), " ==== ");
+
+console.log(UserSchema.safeParse(user).success, " ==== ");
 
 const app = new Elysia()
   .decorate('db', createDb())
